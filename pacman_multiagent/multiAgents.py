@@ -269,7 +269,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 total_score += next_score
             return total_score / len(actions), None
 
-def aStar(gameState: GameState, goal: tuple, heuristic: callable):
+def aStar(gameState, goal, heuristic):
   """
   A* algorithm
   """
@@ -326,7 +326,7 @@ def betterEvaluationFunction(currentGameState):
         if distance_to_ghost < 3:
           current_score -= 100 / (distance_to_ghost + 1)
       else:
-        current_score += 100 / (distance_to_ghost + 1)
+        scared_reward = 200 / (distance_to_ghost + 1) * (1 + ghost.scaredTimer / 20)
         
     return current_score
     util.raise_not_defined()
