@@ -313,15 +313,15 @@ def betterEvaluationFunction(currentGameState):
     current_score -= len(capsules)
 
     if available_foods:
-      min_food_distance = min(astar(pacman_pos, food, currentGameState) for food in available_foods)
+      min_food_distance = min(aStar(pacman_pos, food, currentGameState) for food in available_foods)
       current_score += (10 / (min_food_distance + 1))
 
     if capsules:
-      min_capsule_distance = min(astar(pacman_pos, capsule, currentGameState) for capsule in capsules)
+      min_capsule_distance = min(aStar(pacman_pos, capsule, currentGameState) for capsule in capsules)
       current_score += (15 / (min_capsule_distance + 1))  
     
     for ghost, position in zip(ghost_states, ghost_positions):
-      distance_to_ghost = astar(pacman_pos, position, currentGameState)
+      distance_to_ghost = aStar(pacman_pos, position, currentGameState)
       if ghost.scaredTimer == 0:
         if distance_to_ghost < 3:
           current_score -= 100 / (distance_to_ghost + 1)
