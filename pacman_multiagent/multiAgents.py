@@ -313,23 +313,20 @@ def betterEvaluationFunction(currentGameState):
     current_score -= len(capsules)
 
     if available_foods:
-      min_food_distance = min(aStar(currentGameState, food, manhattan_distance) for food in available_foods)
-      min_food_distance = len(min_food_distance)
+      min_food_distance = min(manhattan_distance(pacman_pos, food) for food in available_foods)
       current_score += (10 / (min_food_distance + 1))
 
     if capsules:
-      min_capsule_distance = min(aStar(currentGameState, capsule, manhattan_distance) for capsule in capsules)
-      min_capsule_distance = len(min_capsule_distance)
+      min_capsule_distance = min(manhattan_distance(pacman_pos, capsule) for capsule in capsules)
       current_score += (15 / (min_capsule_distance + 1))  
     
     for ghost, position in zip(ghost_states, ghost_positions):
-
-      distance_to_ghost = manhattan_distance(pacman_pos, position)
+      distance_to_ghost = len(aStar(currentGameState, position, manhattan_distance))
       if ghost.scaredTimer == 0:
         if distance_to_ghost < 3:
           current_score -= 100 / (distance_to_ghost + 1)
       else:
-        scared_reward = 200 / (distance_to_ghost + 1) * (1 + ghost.scaredTimer / 20)
+        scared_reward = 200 / (distance_to_ghost + 1)
         
     return current_score
     util.raise_not_defined()
