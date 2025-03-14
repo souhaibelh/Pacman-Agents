@@ -278,7 +278,7 @@ def aStar(gameState, goal, heuristic):
   frontier.push((start, []), 0)
   explored = set()
 
-  while not frontier.isEmpty():
+  while not frontier.is_empty():
       current, path = frontier.pop()
       if current == goal:
           return path
@@ -313,15 +313,18 @@ def betterEvaluationFunction(currentGameState):
     current_score -= len(capsules)
 
     if available_foods:
-      min_food_distance = min(aStar(pacman_pos, food, currentGameState) for food in available_foods)
+      min_food_distance = min(aStar(currentGameState, food, manhattan_distance) for food in available_foods)
+      min_food_distance = len(min_food_distance)
       current_score += (10 / (min_food_distance + 1))
 
     if capsules:
-      min_capsule_distance = min(aStar(pacman_pos, capsule, currentGameState) for capsule in capsules)
+      min_capsule_distance = min(aStar(currentGameState, capsule, manhattan_distance) for capsule in capsules)
+      min_capsule_distance = len(min_capsule_distance)
       current_score += (15 / (min_capsule_distance + 1))  
     
     for ghost, position in zip(ghost_states, ghost_positions):
-      distance_to_ghost = aStar(pacman_pos, position, currentGameState)
+
+      distance_to_ghost = manhattan_distance(pacman_pos, position)
       if ghost.scaredTimer == 0:
         if distance_to_ghost < 3:
           current_score -= 100 / (distance_to_ghost + 1)
