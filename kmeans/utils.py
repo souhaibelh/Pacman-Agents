@@ -3,11 +3,11 @@ import numpy as np
 from sklearn.datasets import load_iris, load_breast_cancer
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
-from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics import adjusted_rand_score, silhouette_score
 import matplotlib.pyplot as plt
 from sklearn.impute import SimpleImputer
 
-# Fonction qui supprime les outliers en utilisant la méthode IQR
+# Method that deletes the outliers by using the IQR method
 def remove_outliers(df):
     Q1 = df.quantile(0.25)
     Q3 = df.quantile(0.75)
@@ -15,33 +15,68 @@ def remove_outliers(df):
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
     
-    # On filtre les données qui sont à l'intérieur des bornes définies
+    # We keep the data that fits, which means in the middel of lower bound and uper bound
     df_no_outliers = df[~((df < lower_bound) | (df > upper_bound)).any(axis=1)]
     
     return df_no_outliers
 
-# Fonction qui applique le kmeans et qui nous permet de visualiser le clustering
-def apply_kmeans(X, k_values=[2, 3], model_name="Dataset"):
-    # Scale les donnees
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)  # On normalise les données
+def elbow_method(X, k_max=10):
+    inertias = []
     
-    # Pour chaque valeur de k
+    # Calculate inertia for each k from 1 to k_max
+    for k in range(1, k_max + 1):
+        kmeans = KMeans(n_clusters=k, random_state=0, n_init=10)
+        kmeans.fit(X)
+        inertias.append(kmeans.inertia_)
+    
+    # Plot the inertia to visualize the "elbow"
+    plt.plot(range(1, k_max + 1), inertias, marker='o')
+    plt.xlabel('Number of Clusters (k)')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Method for Optimal k')
+    plt.show()
+
+    # Identify the optimal k by looking for the "elbow"
+    # The elbow point is where the inertia starts decreasing slower
+    optimal_k = inertias.index(min(inertias[2:], key=lambda x: abs(x - inertias[1]))) + 2
+    print(f"Optimal number of clusters (k): {optimal_k}")
+    return optimal_k    
+
+def apply_kmeans(X, k_values=[2, 3], model_name="Dataset"):
+    # Check if 'target' is in X
+    has_target = 'target' in X.columns
+
+    # Separate features and true labels if available
+    if has_target:
+        y_true = X['target']
+        X = X.drop(columns=['target'])
+
+    # Scale the data
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # For each k value
     for k in k_values:
-        # On crée le modèle KMeans
         model = KMeans(n_clusters=k, random_state=0, n_init=10)
         model.fit(X_scaled)
-        
-        # On crée les prédictions
         predictions = model.predict(X_scaled)
-        print(f"Inertie pour K={k} for {model_name}: {model.inertia_:.2f}")
 
-        # Calculer l'Adjusted Rand Index si les vraies étiquettes existent (si disponibles)
-        if "target" in dir(X):
-            ari = adjusted_rand_score(X.target, predictions)
-            print(f"Adjusted Rand Index for K={k} for {model_name}: {ari:.2f}")
-        
-        # Visualiser les données et les centroïdes
+        print(f"\n=== {model_name} | K={k} ===")
+        print(f"Inertie : {model.inertia_:.2f}")
+
+        # We calculate the ARI if there are any labels
+        if has_target:
+            ari = adjusted_rand_score(y_true, predictions)
+            print(f"Adjusted Rand Index : {ari:.2f}")
+
+        # Calculate silhouette score
+        if k > 1:  # Silhouette score is undefined for k=1
+            silhouette = silhouette_score(X_scaled, predictions)
+            print(f"Score de silhouette : {silhouette:.2f}")
+        else:
+            print("Score de silhouette : N/A (k=1)")
+
+        # Plot clusters
         plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=predictions, cmap='viridis', label='Data Points')
         plt.scatter(model.cluster_centers_[:, 0], model.cluster_centers_[:, 1], c='red', marker='X', s=200, label='Centroids')
         plt.title(f'Clusters and Centroids for K={k} ({model_name})')
