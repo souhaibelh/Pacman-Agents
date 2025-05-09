@@ -15,7 +15,7 @@ def remove_outliers(df):
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
     
-    # We keep the data that fits, which means in the middel of lower bound and uper bound
+    # We keep the data that fits, which means in the middle of lower bound and uper bound
     df_no_outliers = df[~((df < lower_bound) | (df > upper_bound)).any(axis=1)]
     
     return df_no_outliers
@@ -40,7 +40,43 @@ def elbow_method(X, k_max=10):
     # The elbow point is where the inertia starts decreasing slower
     optimal_k = inertias.index(min(inertias[2:], key=lambda x: abs(x - inertias[1]))) + 2
     print(f"Optimal number of clusters (k): {optimal_k}")
-    return optimal_k    
+    return optimal_k
+
+def apply_kmeansplus(X, k_values=[2, 3], model_name="Dataset"):
+    has_target = 'target' in X.columns
+
+    if has_target:
+        y_true = X['target']
+        X = X.drop(columns=['target'])
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    for k in k_values:
+        # Explicitly using k-means++ initialization
+        model = KMeans(n_clusters=k, init='k-means++', random_state=0, n_init=10)
+        model.fit(X_scaled)
+        predictions = model.predict(X_scaled)
+
+        print(f"\n=== {model_name} (K-Means++) | K={k} ===")
+        print(f"Inertia: {model.inertia_:.2f}")
+
+        if has_target:
+            ari = adjusted_rand_score(y_true, predictions)
+            print(f"Adjusted Rand Index: {ari:.2f}")
+
+        if k > 1:
+            silhouette = silhouette_score(X_scaled, predictions)
+            print(f"Silhouette Score: {silhouette:.2f}")
+        else:
+            print("Silhouette Score: N/A (k=1)")
+
+        plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=predictions, cmap='viridis', label='Data Points')
+        plt.scatter(model.cluster_centers_[:, 0], model.cluster_centers_[:, 1], c='red', marker='X', s=200, label='Centroids')
+        plt.title(f'K={k} Clusters with K-Means++ ({model_name})')
+        plt.legend()
+        plt.show()
+
 
 def apply_kmeans(X, k_values=[2, 3], model_name="Dataset"):
     # Check if 'target' is in X
@@ -90,7 +126,10 @@ iris_df['target'] = iris.target
 
 # removing outliers (low, upper bound) from iris df
 iris_df_no_outliers = remove_outliers(iris_df)
-apply_kmeans(iris_df, model_name="Iris", k_values=[1,2,3,4,5,6,7,8,9,10])
+optimal_k_iris = elbow_method(iris_df_no_outliers)
+apply_kmeansplus(iris_df_no_outliers, model_name="Iris", k_values=[optimal_k_iris])
+apply_kmeans(iris_df_no_outliers, model_name="Iris", k_values=[optimal_k_iris])
+
 
 # Breast cancer dataset and creating its data frame
 cancer_data = load_breast_cancer()
@@ -99,7 +138,9 @@ cancer_df['target'] = cancer_data.target
 
 # removing outliers (low, upper bound) from brest cancer
 cancer_df_no_outliers = remove_outliers(cancer_df)
-# apply_kmeans(cancer_df_no_outliers, model_name="Breast Cancer", k_values=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+optimal_k_cancer = elbow_method(cancer_df_no_outliers)
+apply_kmeans(cancer_df_no_outliers, model_name="Breast Cancer", k_values=[optimal_k_cancer])
+apply_kmeansplus(cancer_df_no_outliers, model_name="Breast Cancer", k_values=[optimal_k_cancer])
 
 # Wine dataset readnig from csv
 url = "https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"
@@ -107,7 +148,9 @@ wine_df = pd.read_csv(url, header=None)
 
 # removing outliers (low, upper bound) from wine df
 wine_df_no_outliers = remove_outliers(wine_df)
-# apply_kmeans(wine_df_no_outliers, model_name="Wine", k_values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
+optimal_k_wine = elbow_method(wine_df_no_outliers)
+apply_kmeans(wine_df_no_outliers, model_name="Wine", k_values=[optimal_k_wine])
+apply_kmeansplus(wine_df_no_outliers, model_name="Wine", k_values=[optimal_k_wine])
 
 # Loading mall customers .csv (located locally)
 mall_customers_df = pd.read_csv("Mall_Customers.csv")
@@ -128,6 +171,8 @@ mall_customers_X = mall_customers_df[["Age", "Annual_Income_(k$)", "Spending_Sco
 
 # We delete outliers from the mall customers
 mall_customers_X_no_outliers = remove_outliers(mall_customers_X)
+optimal_k_mall = elbow_method(mall_customers_X_no_outliers)
 
 # Apply kmeans to mall customers
-# apply_kmeans(mall_customers_X_no_outliers, model_name="Mall Customers", k_values=[2, 3, 4, 5, 6, 7])
+apply_kmeans(mall_customers_X, model_name="Mall Customers", k_values=[optimal_k_mall])
+apply_kmeansplus(mall_customers_X, model_name="Mall Customers", k_values=[optimal_k_mall])
