@@ -42,7 +42,7 @@ function using the UC Berkeley Pacman framework.
   - Models ghosts as stochastic agents (not strictly adversarial).
   - Plans under uncertainty by averaging over ghost moves.
 
--  **Better Evaluation Function**
+- **Better Evaluation Function**
   - Advanced heuristic that considers:
     - Distance to nearest food and capsules
     - Ghost proximity (scared ghosts vs. active ghosts)
