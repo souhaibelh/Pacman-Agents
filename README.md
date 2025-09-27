@@ -68,7 +68,7 @@ Make sure you have the following installed on your system:
 - Clone the project: ```git clone https://github.com/souhaibelh/Pacman-Agents```
 - Open the project's root folder: ```cd Pacman-Agents```
 - Create pacman_multiagent folder: ```mkdir pacman_multiagent```
-- Copy all files to that folder: ```https://github.com/souhaibelh/Pacman-Agents```
+- Copy all files to that folder: ```xcopy .\* .\pacman_multiagent\ /s /i```
 - Enter the folder: ```cd pacman_multiagent```
 
 ### Usage / Examples
