@@ -73,7 +73,7 @@ Make sure you have the following installed on your system:
 
 ### Usage / Examples
 - **Command:**
-```bash python pacman.py -p [agent] -g [ghost_behavior] -l [layout] -a depth=[depth] -n [number_of_games] [-q]```
+```python pacman.py -p [agent] -g [ghost_behavior] -l [layout] -a depth=[depth] -n [number_of_games] [-q]```
 - Replace **[agent]** for the type of agent pacman will use, find them in the **multiAgents.py** file.
 - Replace **[ghost_behavior]** for the type of behavior the ghosts will use, find them in the **ghostAgents.py** file.
 - Replace **[layout]** for the type of map the game will happen, find them inside the **./layouts** folder.
