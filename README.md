@@ -22,7 +22,7 @@ function using the UC Berkeley Pacman framework.
   <img src="assets/main-screenshot.png" alt="Pacman gameplay with AI agent" width="500"/>
 </p>
 <p align="center">
-  <em>Pacman game running with custom AI agent</em>
+  <em>Pacman game running with custom AI agent (graphical mode)</em>
 </p>
 
 ## Features
@@ -97,5 +97,5 @@ Make sure you have the following installed on your system:
   <img src="assets/pacman-screenshot-2.png" alt="Pacman results in quiet mode" width="500"/>
 </p>
 <p align="center">
-  <em>Pacman results displayed in text-only mode (quiet mode)</em>
+  <em>Pacman results displayed in text-only mode (quiet mode: -q)</em>
 </p>
